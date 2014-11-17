@@ -1,5 +1,4 @@
 from sumStats.models import Genotype
-import ipdb
 
 def populate_all_fields(fileName, genoTypeName):
     

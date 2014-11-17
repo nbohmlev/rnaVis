@@ -2,6 +2,8 @@ from django.contrib import admin
 from sumStats.models import Genotype, SequenceLength
 # Register your models here.
 
+admin.site.register(Genotype, GenotypeAdmin)
+
 class SequenceLengthInline(admin.TabularInline):
     model = SequenceLength
     extra = 1
@@ -18,4 +20,3 @@ class GenotypeAdmin(admin.ModelAdmin):
 
     search_fields = ['genotype_name', 'sequencelength__seqName']
     
-admin.site.register(Genotype, GenotypeAdmin)
