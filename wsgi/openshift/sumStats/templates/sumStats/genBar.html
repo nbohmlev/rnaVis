@@ -1,0 +1,225 @@
+{% load staticfiles %}
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'sumStats/style.css' %}" />
+
+{% if result %}
+<body>
+<script>
+var data = {{ result|safe }}
+//document.write(JSON.stringify(data))
+
+var yAxisText = "{{ yAxisText }}"
+
+var margin = {top: 20, right: 20, bottom: 30, left: 60},
+    width = 600 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+var x = d3.scale.ordinal()
+    .rangeBands([0, width], 1, 1);
+
+var y = d3.scale.linear()
+    .range([height, 0]);
+
+var color = d3.scale.category10();
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom");
+
+var yAxis = d3.svg.axis()
+.scale(y)
+.orient("left");
+
+var tip = d3.tip()
+.attr("class", "d3-tip")
+.offset([-10, 0])
+.html(function(d) {
+return "<span style='color:yellow'>"+d.seqName+ "</span>";
+})
+
+
+var svg = d3.select("body").append("div")
+.attr("align", "center").append("svg")
+.attr("width", width + margin.left + margin.right)
+.attr("height", height + margin.top + margin.bottom)
+.append("g")
+.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+svg.call(tip);
+
+//Write a function that takes all the seqLen values into an array
+//This will be the domain
+var seqLens = [];
+for (i = 0; i < data.length; i++) { 
+    innerData = data[i].seqObject;
+	for (j = 0; j < innerData.length; j++) {
+			seqLens.push(innerData[j].seqLen);
+}
+}
+
+xtnt = d3.extent(seqLens);
+newXtnt = [xtnt[0]-.1*xtnt[0], xtnt[1]+.1*xtnt[1]]
+
+x.domain(data.map(function(d) { return d.genotype_name; }));
+y.domain(newXtnt);
+svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis)
+	.append("text")
+      .attr("class", "label")
+      .attr("x", width)
+      .attr("y", -6)
+      .style("text-anchor", "end")
+      .text("Genotype");
+
+svg.append("g")
+.attr("class", "y axis")
+.call(yAxis)
+.append("text")
+.attr("class", "label")
+.attr("transform", "rotate(-90)")
+.attr("y", 6)
+.attr("dy", ".71em")
+.style("text-anchor", "end")
+.text(yAxisText)
+
+function randomNumWithinInterval(min, max){
+return Math.floor(Math.random()*(max-min+1)+min);
+}
+
+function jit(count){
+r = x.range();
+rStep = r[0]/3;
+return randomNumWithinInterval(r[count]-rStep, r[count]+rStep);
+}
+
+function getErrHorzBarLo(d,i){
+r = x.range();
+rStep = r[0]/5;
+return (r[i]-rStep);
+}
+
+function getErrHorzBarHi(d,i){
+r = x.range();
+rStep = r[0]/5;
+return r[i]+rStep;
+}
+
+sa=svg.selectAll(".cat")
+.data(data)
+.enter().append("g").attr("class", "cat")
+
+var count = 0;
+sa.each(function(){
+sc = d3.select(this)
+sd = sc.selectAll(".dot").data(function(d){return d.seqObject}).enter().append("circle")
+.attr("class", "dot")
+.attr("r", 5)
+.attr("cx", function() { return jit(count); })
+.style("fill", function(d) { return color(d.genotype_name); })
+.style("fill-opacity", 0.75)
+.attr("cy", function(d) { l=d.seqLen;return y(l); })
+.on('mouseover', tip.show)
+.on('mouseout', tip.hide)
+.style("cursor", "pointer")
+count = count + 1;
+})
+
+
+sa.append("line")
+.attr("class", "errBarVert")
+.attr("x1", function(d){return x(d.genotype_name)})
+.attr("x2", function(d){return x(d.genotype_name)})
+.attr("y1", function(d){return y(d.seqLenMean - d.seqLenSem)})
+.attr("y2", function(d){return y(d.seqLenMean + d.seqLenSem)})
+.style("stroke", "black")
+.style("stroke-width", 4)
+
+sa.append("line")
+.attr("class", "errBarVert")
+.attr("x1", function(d){return x(d.genotype_name)})
+.attr("x2", function(d){return x(d.genotype_name)})
+.attr("y1", function(d){return y(d.seqLenMean - d.seqLenSem)})
+.attr("y2", function(d){return y(d.seqLenMean + d.seqLenSem)})
+.style("stroke", "white")
+.style("stroke-width", 1)
+
+sa.append("line")
+.attr("class", "errBarHorz")
+.attr("x1", function(d,i){return getErrHorzBarLo(d,i);})
+.attr("x2", function(d,i){return getErrHorzBarHi(d,i);})
+.attr("y1", function(d){return y(d.seqLenMean + d.seqLenSem)})
+.attr("y2", function(d){return y(d.seqLenMean + d.seqLenSem)})
+.style("stroke", "black")
+.style("stroke-width", 4);
+
+sa.append("line")
+.attr("class", "errBarHorz")
+.attr("x1", function(d,i){return getErrHorzBarLo(d,i);})
+.attr("x2", function(d,i){return getErrHorzBarHi(d,i);})
+.attr("y1", function(d){return y(d.seqLenMean + d.seqLenSem)})
+.attr("y2", function(d){return y(d.seqLenMean + d.seqLenSem)})
+.style("stroke", "black")
+.style("stroke-width", 4);
+
+sa.append("line")
+.attr("class", "errBarHorz")
+.attr("x1", function(d,i){return getErrHorzBarLo(d,i);})
+.attr("x2", function(d,i){return getErrHorzBarHi(d,i);})
+.attr("y1", function(d){return y(d.seqLenMean + d.seqLenSem)})
+.attr("y2", function(d){return y(d.seqLenMean + d.seqLenSem)})
+.style("stroke", "white")
+.style("stroke-width", 1);
+
+sa.append("line")
+.attr("class", "errBarHorz")
+.attr("x1", function(d,i){return getErrHorzBarLo(d,i);})
+.attr("x2", function(d,i){return getErrHorzBarHi(d,i);})
+.attr("y1", function(d){return y(d.seqLenMean - d.seqLenSem)})
+.attr("y2", function(d){return y(d.seqLenMean - d.seqLenSem)})
+.style("stroke", "black")
+.style("stroke-width", 4);
+
+sa.append("line")
+.attr("class", "errBarHorz")
+.attr("x1", function(d,i){return getErrHorzBarLo(d,i);})
+.attr("x2", function(d,i){return getErrHorzBarHi(d,i);})
+.attr("y1", function(d){return y(d.seqLenMean - d.seqLenSem)})
+.attr("y2", function(d){return y(d.seqLenMean - d.seqLenSem)})
+.style("stroke", "white")
+.style("stroke-width", 1);
+
+sa.append("circle")
+.attr("class", "bigDot")
+.attr("r", 8)
+.attr("cx", function(d){return x(d.genotype_name)})
+.attr("cy", function(d){return y(d.seqLenMean)})
+.style("fill", "white")
+.style("stroke", "black")
+.style("stroke-width", 3)
+
+var legend = svg.selectAll(".legend")
+.data(color.domain())
+.enter().append("g")
+.attr("class", "legend")
+.attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+legend.append("rect")
+.attr("x", width - 18)
+.attr("width", 18)
+.attr("height", 18)
+.style("fill", color);
+
+legend.append("text")
+.attr("x", width - 24)
+.attr("y", 9)
+.attr("dy", ".35em")
+.style("text-anchor", "end")
+.text(function(d) { return d; });
+</script>
+
+{% endif %}
+
+

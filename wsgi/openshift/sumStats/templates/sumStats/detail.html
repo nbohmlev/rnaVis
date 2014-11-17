@@ -1,0 +1,15 @@
+<h1>{{ genotype.genotype_name }}</h1>
+
+<ul>
+{% for choice in genotype.sequencelength_set.all %}
+    <li>{{ choice.seqName }}, {{ choice.seqLen}}</li>
+{% endfor %}
+</ul>
+
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form action="{% url 'sumStats:result' genotype.id %}" method="post">
+{% csrf_token %}   
+<input type="submit" value="Calculate summary statistics" />
+</form>

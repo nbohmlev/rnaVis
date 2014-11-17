@@ -1,0 +1,20 @@
+{% load staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static 'sumStats/style.css' %}" />
+{% if result %}
+<body>
+<table>
+<tr>
+<td> Category </td>
+<td> K-S Statistic </td>
+<td> K-S p-value</td>
+<td> Approximates Normal?</td>
+{% for key, value in result.items %}
+<tr>
+<td>{{key}}</td>
+<td>{{value.kstest.0 | floatformat:"3" }}</td>
+<td>{{value.kstest.1 | floatformat:"3" }}</td>
+<td>{{value.hypothesis}}</td>
+</tr>
+{% endfor %}
+</table>
+{% endif %}
