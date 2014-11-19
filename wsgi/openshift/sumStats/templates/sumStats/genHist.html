@@ -96,7 +96,7 @@ svg.append("g")
 .text("{{ yAxisText }}")
 
 var kde = kernelDensityEstimator(epanechnikovKernel({{bandwidth}}), x.ticks(100));
-y.domain([0, findMax(getAllKde(result), .1)]);
+y.domain([0, findMax(getAllKde(result), .2)]);
 
 svg.selectAll(".path")
 .data(d3.values(result))
