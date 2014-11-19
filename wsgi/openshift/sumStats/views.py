@@ -82,7 +82,7 @@ def makeStat(request, genotype_ids, modelName):
     
     return "sameer"
 
-def makeKS(request, genotype_ids):
+def makeKS(request, genotype_ids, modelName):
     allModelNames = getModelNames()
     
     data = {}
@@ -160,7 +160,7 @@ def genBar(request):
                 template = 'genStats.html' 
         elif 'genKS' in request.POST:
             if len(genotype_ids) == 1:
-                dataJson = makeKS(request, genotype_ids)
+                dataJson = makeKS(request, genotype_ids, modelName)
                 template = 'genKS.html'
         elif 'genHist' in request.POST:
             dataJson = makeHist(request, genotype_ids, modelName)
