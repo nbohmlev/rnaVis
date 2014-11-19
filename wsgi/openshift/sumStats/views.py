@@ -104,6 +104,25 @@ def makeKS(request, genotype_ids):
         data[model] = {"kstest":result, "hypothesis":hyp} 
     return data
 
+def makeHist(request, genotype_ids, modelName):
+    
+    data = []
+    for item in genotype_ids:
+        genotype = get_object_or_404(Genotype, pk=item)
+        exec("seqSet = genotype.%s_set.all()"%modelName)
+        genotype_name = "%s" % genotype
+        dataDict = defaultdict(list)
+        dataDict['genotype_name'] = genotype_name
+        allSeqLens = []
+        for innerItem in seqSet:
+            seqLen = innerItem.seqLen
+            allSeqLens.append(seqLen)
+        
+        dataDict['allSeqLens'] = allSeqLens
+        data.append(dataDict)
+    return JSON.dumps(data)
+
+
 def genBar(request):
 
     queryList = dict(request.POST.iterlists())
@@ -131,6 +150,9 @@ def genBar(request):
             if len(genotype_ids) == 1:
                 dataJson = makeKS(request, genotype_ids)
                 template = 'genKS.html'
+        elif 'genHist' in request.POST:
+            dataJson = makeHist(request, genotype_ids, modelName)
+            template = 'genHist.html'
 
     return render(request, 'sumStats/%s'%(template), {'result': dataJson, 'modelName':modelName, 'yAxisText': yAxisText})
  
