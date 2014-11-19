@@ -36,7 +36,7 @@ var result = {{result | safe}}
 //document.write(JSON.stringify(result))
 //document.write("{{ modelName }}")
 
-var margin = {top: 20, right: 30, bottom: 30, left: 60},
+var margin = {top: 20, right: 30, bottom: 30, left: 80},
     width = 600 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
@@ -85,8 +85,15 @@ svg.append("g")
     .text("{{xAxisText}}");
 
 svg.append("g")
-    .attr("class", "y axis")
-    .call(yAxis);
+.attr("class", "y axis")
+.call(yAxis)
+.append("text")
+.attr("class", "label")
+.attr("transform", "rotate(-90)")
+.attr("y", -70)
+.attr("dy", ".71em")
+.style("text-anchor", "end")
+.text("{{ yAxisText }}")
 
 var kde = kernelDensityEstimator(epanechnikovKernel({{bandwidth}}), x.ticks(100));
 y.domain([0, findMax(getAllKde(result), .1)]);

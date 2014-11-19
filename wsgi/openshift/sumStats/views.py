@@ -79,9 +79,28 @@ def makeBar(request, genotype_ids, modelName):
     return {'result':JSON.dumps(data), 'yAxisText': yAxisText, 'modelName':modelName}
 
 def makeStat(request, genotype_ids, modelName):
-    
-    return "sameer"
+    allModelNames = getModelNames()
+    criticalValue = 0.05
 
+    data = []
+    for model in allModelNames:
+        modelAttr = []
+        for item in genotype_ids:
+            genotype = get_object_or_404(Genotype, pk=item)
+            exec("seqSet = genotype.%s_set.all()"%model)
+            allSeqLens = []
+            for innerItem in seqSet:
+                allSeqLens.append(innerItem.seqLen)
+            modelAttr.append(allSeqLens)
+        mu = stats.mannwhitneyu(modelAttr[0], modelAttr[1])
+        if mu[1] < criticalValue:
+            hyp = True
+        else:
+            hyp = False
+        data.append({'model':model, 'muStat':mu[0], 'muP':mu[1], 'hyp':hyp})       
+    return {'result':data}
+    
+    
 def makeKS(request, genotype_ids, modelName):
     allModelNames = getModelNames()
     

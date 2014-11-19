@@ -1,1 +1,21 @@
-{{ result }}
+{% load staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static 'sumStats/style.css' %}" />
+{% if result %}
+<body>
+<table>
+<p> Using a critical value of 0.05. Should we do a Bonferroni correction? </p>
+<tr>
+<td> Category </td>
+<td> Mann Whitney Statistic </td>
+<td> Mann Whitney p-value</td>
+<td> Significantly different</td>
+{% for item in result %}
+<tr>
+<td>{{item.model}}</td>
+<td>{{item.muStat | floatformat:"0" }}</td>
+<td>{{item.muP | floatformat:"3" }}</td>
+<td>{{item.hyp}}</td>
+</tr>
+{% endfor %}
+</table>
+{% endif %}
