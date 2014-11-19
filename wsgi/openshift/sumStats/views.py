@@ -49,6 +49,12 @@ def result(request, pk):
     return render(request, 'sumStats/result.html', {'mean':meanVal})
 
 def makeBar(request, genotype_ids, modelName):
+    
+    if modelName[-2:]=='gc':
+        yAxisText = 'GC Content'
+    else:
+        yAxisText = 'Length'
+
 
     data = []
     for item in genotype_ids:
@@ -70,7 +76,7 @@ def makeBar(request, genotype_ids, modelName):
         dataDict['seqLenMean'] = seqLenMean
         dataDict['seqLenSem'] = seqLenSem
         data.append(dataDict)
-    return JSON.dumps(data)
+    return {'result':JSON.dumps(data), 'yAxisText': yAxisText, 'modelName':modelName}
 
 def makeStat(request, genotype_ids, modelName):
     
@@ -102,7 +108,7 @@ def makeKS(request, genotype_ids):
             hyp = False
         
         data[model] = {"kstest":result, "hypothesis":hyp} 
-    return data
+    return {'result': data, 'modelName':modelName}
 
 def makeHist(request, genotype_ids, modelName):
     
@@ -110,9 +116,20 @@ def makeHist(request, genotype_ids, modelName):
     for item in genotype_ids:
         genotype = get_object_or_404(Genotype, pk=item)
         exec("seqSet = genotype.%s_set.all()"%modelName)
+
+        if modelName[-2:]=='gc':
+            xAxisText = 'GC Content'
+            bandwidth = 7
+        else:
+            xAxisText = 'Length'
+            bandwidth = 700
+        if modelName == 'fiveutrlength':
+            bandwidth = 200
+            
         genotype_name = "%s" % genotype
         dataDict = defaultdict(list)
         dataDict['genotype_name'] = genotype_name
+
         allSeqLens = []
         for innerItem in seqSet:
             seqLen = innerItem.seqLen
@@ -120,8 +137,7 @@ def makeHist(request, genotype_ids, modelName):
         
         dataDict['allSeqLens'] = allSeqLens
         data.append(dataDict)
-    return JSON.dumps(data)
-
+    return {'result': JSON.dumps(data), 'modelName':modelName, 'xAxisText': xAxisText, 'bandwidth':bandwidth, 'yAxisText':'Probability'}
 
 def genBar(request):
 
@@ -130,12 +146,8 @@ def genBar(request):
 
     modelName = str(queryList.get('modelName')[0])
 
-    if modelName[-2:]=='gc':
-        yAxisText = 'GC Content'
-    else:
-        yAxisText = 'Length'
        
-    dataJson = "Select appropriate number of genotypes. n=1 for K-S, n=2 for hypothesis test, n>0 for bar graphs"
+    dataJson = {'result':"Select appropriate number of genotypes. n=1 for K-S, n=2 for hypothesis test, n>0 for bar graphs"}
     template = 'warning.html'
     
     if genotype_ids != None:
@@ -154,7 +166,7 @@ def genBar(request):
             dataJson = makeHist(request, genotype_ids, modelName)
             template = 'genHist.html'
 
-    return render(request, 'sumStats/%s'%(template), {'result': dataJson, 'modelName':modelName, 'yAxisText': yAxisText})
+    return render(request, 'sumStats/%s'%(template), dataJson)
  
 #def detail(request, genotype_id):
  #    genotype = get_object_or_404(Genotype, pk=genotype_id)

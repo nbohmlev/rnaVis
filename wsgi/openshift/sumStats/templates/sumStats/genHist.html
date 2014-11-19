@@ -3,8 +3,6 @@
 <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
 <script type="text/javascript" src="{%static 'sumStats/science.v1.js' %}"></script><style>
 
-.y.axis text { display: none; }
-
 body {
   font: 14px sans-serif;
 }
@@ -17,7 +15,7 @@ body {
 .line {
   fill: none;
   stroke: #000;
-  stroke-width: 1.5px;
+  stroke-width: 3px;
 }
 
 .axis path,
@@ -36,20 +34,22 @@ body {
 <script>
 var result = {{result | safe}}
 //document.write(JSON.stringify(result))
+//document.write("{{ modelName }}")
 
 var margin = {top: 20, right: 30, bottom: 30, left: 40},
     width = 600 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
 xtnt = d3.extent(result[0].allSeqLens);
-newXtnt = [xtnt[0]-.1*xtnt[0], xtnt[1]+.1*xtnt[1]]
+fac = .1;
+newXtnt = [xtnt[0]-fac*xtnt[0], xtnt[1]+fac*xtnt[1]]
 
 var x = d3.scale.linear()
     .domain([newXtnt[0], newXtnt[1]])
     .range([0, width]);
 
+
 var y = d3.scale.linear()
-    .domain([0, .001])
     .range([height, 0]);
 
 var color = d3.scale.category10();
@@ -82,13 +82,14 @@ svg.append("g")
     .attr("x", width+30)
     .attr("y", -20)
     .style("text-anchor", "end")
-    .text("GC content");
+    .text("{{xAxisText}}");
 
 svg.append("g")
     .attr("class", "y axis")
     .call(yAxis);
 
-var kde = kernelDensityEstimator(epanechnikovKernel(1000), x.ticks(10000));
+var kde = kernelDensityEstimator(epanechnikovKernel({{bandwidth}}), x.ticks(100));
+y.domain([0, findMax(getAllKde(result), .1)]);
 
 svg.selectAll(".path")
 .data(d3.values(result))
@@ -117,6 +118,31 @@ legend.append("text")
 .style("text-anchor", "end")
 .text(function(d) { return d; });
 
+function getAllKde(result){
+allKde = [];
+for(i=0;i<result.length;i++){
+allKde.push(kde(result[i].allSeqLens));
+}
+return allKde;
+}
+
+function findMax(arrOfArr, fac){
+tempMax = 0;
+for(i=0;i<arrOfArr.length;i++){
+temp2 = m(arrOfArr[i]);
+if (temp2 > tempMax){
+maxNum = temp2;
+}
+}
+return maxNum + fac*maxNum;
+}
+
+function m(arr){
+na = []
+for(i=0; i<arr.length; i++){
+na.push(arr[i][1]);
+}
+return d3.max(na);}
 
 function kernelDensityEstimator(kernel, x) {
   return function(sample) {
