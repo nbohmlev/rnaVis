@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 import os
 import imp
 
+LOGIN_REDIRECT_URL = '/sumStats'
+LOGIN_URL = 'django.contrib.auth.views.login'
+
 ON_OPENSHIFT = False
 if os.environ.has_key('OPENSHIFT_REPO_DIR'):
      ON_OPENSHIFT = True

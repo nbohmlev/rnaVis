@@ -1,6 +1,6 @@
 {% load staticfiles %}
 <link rel="stylesheet" type="text/css" href="{% static 'sumStats/style.css' %}" />
-
+<p>Hello {{user}}</p>
 {% if latest_genotype_list %}
     <ul>
     <form action = "{% url 'sumStats:genBar' %}" method="POST">
@@ -21,7 +21,7 @@
      </p>
     </li>
     </form>
-   
+    <li> <a href="{% url 'django.contrib.auth.views.logout' %}">logout</a> </li>
     </ul>
 {% else %}
     <p>No genotypes are available.</p>

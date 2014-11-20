@@ -10,6 +10,9 @@ import numpy as np
 from django.db import models
 from sumStats.forms import StatForm
 
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+
 #class IndexView(generic.ListView):
  #   template_name = 'sumStats/index.html'
   #  context_object_name = 'latest_genotype_list'
@@ -18,8 +21,8 @@ from sumStats.forms import StatForm
     #    return Genotype.objects.filter(
      #       pub_date__lte = timezone.now()
       #      ).order_by('-pub_date')[:5]
-
     
+
 class DetailView(generic.DetailView):
     model = Genotype
     template_name = 'sumStats/detail.html'
@@ -34,7 +37,7 @@ def getModelNames():
 def index(request):
     latest_genotype_list = Genotype.objects.order_by('-pub_date')[:5]
     form = StatForm(auto_id=False)
-    context = {'latest_genotype_list': latest_genotype_list, 'form':form}
+    context = {'latest_genotype_list': latest_genotype_list, 'form':form, 'user':request.user.first_name}
     return render(request, 'sumStats/index.html', context)
 
 def result(request, pk):
