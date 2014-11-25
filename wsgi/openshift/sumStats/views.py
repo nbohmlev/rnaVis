@@ -35,7 +35,7 @@ def getModelNames():
     return allModelNames[1:]
 
 def index(request):
-    latest_genotype_list = Genotype.objects.order_by('-pub_date')[:5]
+    latest_genotype_list = Genotype.objects.order_by('-pub_date')
     form = StatForm(auto_id=False)
     context = {'latest_genotype_list': latest_genotype_list, 'form':form, 'user':request.user.first_name}
     return render(request, 'sumStats/index.html', context)

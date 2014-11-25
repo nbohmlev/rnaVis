@@ -1,4 +1,5 @@
 from sumStats.models import Genotype
+import ipdb
 
 def populate_all_fields(fileName, genoTypeName):
     
@@ -13,6 +14,7 @@ def populate_all_fields(fileName, genoTypeName):
                'threeutrlength': 7,
                'threeutrgc': 8}
 
+    #ipdb.set_trace()
     for key, value in allModels.iteritems():
         exec('genotype.%s_set.all().delete()' % key) ##(DANGER!!!)
         with open(fileName, 'rU') as f:
@@ -24,4 +26,15 @@ def populate_all_fields(fileName, genoTypeName):
 if __name__=="__main__":
     populate_all_fields('sumStats/static/sumStats/fxsUp.txt', 'fmr1_up')
     populate_all_fields('sumStats/static/sumStats/fxsDown.txt', 'fmr1_down')
-            
+
+    populate_all_fields('sumStats/static/sumStats/dhpgFxsOnlyUp.txt', 'dhpg_Fxs_only Up')
+    populate_all_fields('sumStats/static/sumStats/dhpgFxsOnlyDown.txt', 'dhpg_Fxs_only Down')
+    
+    populate_all_fields('sumStats/static/sumStats/dhpgWtOnlyUp.txt', 'dhpg_WT_only Up')
+    populate_all_fields('sumStats/static/sumStats/dhpgWtOnlyDown.txt', 'dhpg_WT_only Down')
+    
+    populate_all_fields('sumStats/static/sumStats/dhpgFxsWtOverlapSameDirUp.txt', 'dhpg_FXS_wt common_same_dir Up')
+    populate_all_fields('sumStats/static/sumStats/dhpgFxsWtOverlapSameDirDown.txt', 'dhpg_FXS_wt common_same_dir Down')
+
+    populate_all_fields('sumStats/static/sumStats/dhpgFxsWtOverlapOppositeDirFxsUpWtDown.txt', 'dhpg_FXS_wt common_opp_dir fxs_Up Wt_down')
+    populate_all_fields('sumStats/static/sumStats/dhpgFxsWtOverlapOppositeDirFxsDownWtUp.txt', 'dhpg_FXS_wt common_opp_dir fxs_Down Wt_Up')

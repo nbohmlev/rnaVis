@@ -11,12 +11,12 @@ var data = {{ result|safe }}
 
 var yAxisText = "{{ yAxisText }}"
 
-var margin = {top: 20, right: 20, bottom: 30, left: 60},
-    width = 600 - margin.left - margin.right,
+var margin = {top: 20, right: 20, bottom: 80, left: 60},
+    width = 800 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
 var x = d3.scale.ordinal()
-    .rangeBands([0, width], 1, 1);
+    .rangeBands([0, width],1);
 
 var y = d3.scale.linear()
     .range([height, 0]);
@@ -72,7 +72,21 @@ svg.append("g")
       .attr("x", width)
       .attr("y", -6)
       .style("text-anchor", "end")
-      .text("Genotype");
+      .text("Genotype")
+
+var insertLinebreaks = function (d) {
+    var el = d3.select(this);
+    var words = d.split(' ');
+    el.text('');
+
+    for (var i = 0; i < words.length; i++) {
+        var tspan = el.append('tspan').text(words[i]);
+        if (i > 0)
+            tspan.attr('x', 0).attr('dy', '15');
+    }
+};
+
+svg.selectAll('g.x.axis g text').each(insertLinebreaks);
 
 svg.append("g")
 .attr("class", "y axis")
@@ -218,6 +232,7 @@ legend.append("text")
 .attr("dy", ".35em")
 .style("text-anchor", "end")
 .text(function(d) { return d; });
+
 </script>
 
 {% endif %}
