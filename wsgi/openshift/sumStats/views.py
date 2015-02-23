@@ -9,10 +9,16 @@ from scipy import stats
 import numpy as np
 from django.db import models
 from sumStats.forms import StatForm
+import pandas as pd
+from random import shuffle
+import scipy.cluster.hierarchy as hier
+import scipy.spatial.distance as dist
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-
+#from django.conf.settings import PROJECT_ROOT
+import os
+from django.http import HttpResponse
 #class IndexView(generic.ListView):
  #   template_name = 'sumStats/index.html'
   #  context_object_name = 'latest_genotype_list'
@@ -193,3 +199,60 @@ def genBar(request):
 #def detail(request, genotype_id):
  #    genotype = get_object_or_404(Genotype, pk=genotype_id)
   #   return render(request, 'sumStats/detail.html', {'genotype':genotype})
+def genHeatMap(request):
+
+    queryList = dict(request.POST.iterlists())
+    genotype_ids = queryList.get('genotype_ids')
+
+    allGenotypes = Genotype.objects.all()
+    allTargetCounts = []
+    gNames = []
+    for outerItem in allGenotypes:
+        allMirs = outerItem.mir_set.all()
+        gNames.append(outerItem.genotype_name)
+        targetCounts = {}
+        for item in allMirs:
+            fullName = '%s_%s'%(item.mir_name, item.mir_reg)
+            targetCounts[fullName] = float(item.mirtarget_set.all().count())
+        allTargetCounts.append(targetCounts)
+            
+    allData = pd.DataFrame(allTargetCounts, index=gNames)
+
+    #allData = allData.transpose()
+
+    
+    pairWiseDist = dist.pdist(allData)
+    pairWiseDist = dist.squareform(pairWiseDist) #EXTREMELY IMPORTANT!
+    linkage = hier.linkage(pairWiseDist)
+    hierarchialOrder = hier.leaves_list(linkage)
+    #dataSortedByRowCluster = allData.ix[hierarchialOrder,:]
+
+    #allData = dataSortedByRowCluster
+
+    nRows = allData.shape[0]
+    nCols = allData.shape[1]
+    PROJECT_ROOT =  os.path.abspath(os.path.dirname(__file__))
+    fPath = os.path.join(PROJECT_ROOT, 'static/sumStats/hmpDat.tsv')
+    with open(fPath, 'w') as f:
+        f.write('row_idx\tcol_idx\tlog2ratio\n')
+        for col in range(nCols):
+            tempCol = allData.ix[:,col]
+            num = 0
+            for item in tempCol.iteritems():
+                f.write('%d\t%d\t%d\n' %(num+1, col+1, item[1]))
+                num+=1
+    
+    hcrow = list(hierarchialOrder + 1)
+    hcrow = ','.join(str(e) for e in hcrow)
+    hcrow = '[%s]'%hcrow
+
+    hccol = np.array(range(nCols))+1
+    hccol = ','.join(str(e) for e in hccol)
+    hccol = '[%s]'%hccol
+
+    cNames = JSON.dumps((list(allData.columns.values)))
+    rNames = JSON.dumps(list(allData.index))
+
+    context = {'hcrow':hcrow, 'hccol': hccol, 'rowLabel': rNames, 'colLabel': cNames, 'row_number':nRows, 'col_number':nCols}
+
+    return render(request, 'sumStats/genHeatMap.html', context)

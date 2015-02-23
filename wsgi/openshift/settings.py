@@ -14,6 +14,8 @@ import imp
 LOGIN_REDIRECT_URL = '/sumStats'
 LOGIN_URL = 'django.contrib.auth.views.login'
 
+PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
+
 ON_OPENSHIFT = False
 if os.environ.has_key('OPENSHIFT_REPO_DIR'):
      ON_OPENSHIFT = True

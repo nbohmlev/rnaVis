@@ -1,4 +1,5 @@
 {% load staticfiles %}
+
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
 <link rel="stylesheet" type="text/css" href="{% static 'sumStats/style.css' %}" />
@@ -233,8 +234,15 @@ legend.append("text")
 .style("text-anchor", "end")
 .text(function(d) { return d; });
 
-</script>
+var svgObj = d3.select("svg")
+        .attr("title", "test2")
+        .attr("version", 1.1)
+        .attr("xmlns", "http://www.w3.org/2000/svg")
+        .node().parentNode.innerHTML;
 
+tempObj = '<svg height="100" width="100"><circle cx="50" cy="50" fill="red" r="40" stroke="black" stroke-width="3"/></svg>'
+d3.select(".hidSvg").attr("value", tempObj);
+</script>
 {% endif %}
 
 

@@ -7,6 +7,8 @@
 *.egg-info
 .project
 .pydevproject
+*.zip
+*.tsv
 venv/
 virtenv/
 dist/
