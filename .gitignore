@@ -9,6 +9,7 @@
 .pydevproject
 *.zip
 *.tsv
+*.txt
 venv/
 virtenv/
 dist/
