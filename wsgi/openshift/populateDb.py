@@ -62,7 +62,8 @@ def populate_mir_targets(fList):
         
 if __name__=="__main__":
     
-    Genotype.objects.all().delete()
+    ipdb.set_trace()
+    #Genotype.objects.all().delete()
     refs={'dhpgFxsOnlyDown': 'A_Down',
           'dhpgFxsOnlyDown3C': 'A_Down 3C',
           'dhpgFxsOnlyUp': 'A_Up',
@@ -80,11 +81,16 @@ if __name__=="__main__":
           'dhpgWtOnlyUp': 'B_Up',
           'dhpgWtOnlyUp3C': 'B_Up 3C',
           'fxsDown': 'fmr1_down',
-          'fxsUp': 'fmr1_up'}
+          'fxsUp': 'fmr1_up',
+          'fourEup':'4E_up',
+          'fourEdown':'4E_down',
+          }
 
-    #ipdb.set_trace()
     populate_all_fields('sumStats/static/sumStats/fxsUp.txt', 'fmr1_up')
     populate_all_fields('sumStats/static/sumStats/fxsDown.txt', 'fmr1_down')
+
+    populate_all_fields('sumStats/static/sumStats/fourEup.txt', '4E_up')
+    populate_all_fields('sumStats/static/sumStats/fourEdown.txt', '4E_down')
 
     populate_all_fields('sumStats/static/sumStats/dhpgFxsOnlyUp.txt', 'A_Up')#'dhpg_Fxs_only Up')
     populate_all_fields('sumStats/static/sumStats/dhpgFxsOnlyDown.txt', 'A_Down')#'dhpg_Fxs_only Down')

@@ -193,18 +193,21 @@ def genBar(request):
         elif 'genHist' in request.POST:
             dataJson = makeHist(request, genotype_ids, modelName)
             template = 'genHist.html'
-
+        elif 'genHeatMap' in request.POST:
+            dataJson = genHeatMap(request, genotype_ids)
+            template = 'genHeatMap.html'
     return render(request, 'sumStats/%s'%(template), dataJson)
  
 #def detail(request, genotype_id):
  #    genotype = get_object_or_404(Genotype, pk=genotype_id)
   #   return render(request, 'sumStats/detail.html', {'genotype':genotype})
-def genHeatMap(request):
+def genHeatMap(request, genotype_ids):
 
-    queryList = dict(request.POST.iterlists())
-    genotype_ids = queryList.get('genotype_ids')
+    #allGenotypes = Genotype.objects.all()
+    allGenotypes=[]
+    for item in genotype_ids:
+        allGenotypes.append(get_object_or_404(Genotype, pk=item))
 
-    allGenotypes = Genotype.objects.all()
     allTargetCounts = []
     gNames = []
     for outerItem in allGenotypes:
@@ -253,6 +256,6 @@ def genHeatMap(request):
     cNames = JSON.dumps((list(allData.columns.values)))
     rNames = JSON.dumps(list(allData.index))
 
-    context = {'hcrow':hcrow, 'hccol': hccol, 'rowLabel': rNames, 'colLabel': cNames, 'row_number':nRows, 'col_number':nCols}
-
-    return render(request, 'sumStats/genHeatMap.html', context)
+    return {'hcrow':hcrow, 'hccol': hccol, 'rowLabel': rNames, 'colLabel': cNames, 'row_number':nRows, 'col_number':nCols}
+    
+   # return render(request, 'sumStats/genHeatMap.html', context)
