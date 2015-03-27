@@ -16,7 +16,6 @@ import scipy.spatial.distance as dist
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-#from django.conf.settings import PROJECT_ROOT
 import os
 from django.http import HttpResponse
 #class IndexView(generic.ListView):
