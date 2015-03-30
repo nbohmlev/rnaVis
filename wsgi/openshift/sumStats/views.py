@@ -202,7 +202,6 @@ def genBar(request):
   #   return render(request, 'sumStats/detail.html', {'genotype':genotype})
 def genHeatMap(request, genotype_ids):
 
-    #allGenotypes = Genotype.objects.all()
     allGenotypes=[]
     for item in genotype_ids:
         allGenotypes.append(get_object_or_404(Genotype, pk=item))
@@ -214,13 +213,19 @@ def genHeatMap(request, genotype_ids):
         gNames.append(outerItem.genotype_name)
         targetCounts = {}
         for item in allMirs:
+            allTargetSet = item.mirtarget_set.all()
+            modTargetSet = []
+            for innerItem in allTargetSet:
+                if innerItem.tScore > 80:
+                    modTargetSet.append(innerItem)
+
             fullName = '%s_%s'%(item.mir_name, item.mir_reg)
-            targetCounts[fullName] = float(item.mirtarget_set.all().count())
+            targetCounts[fullName] = float(len(modTargetSet))
         allTargetCounts.append(targetCounts)
             
     allData = pd.DataFrame(allTargetCounts, index=gNames)
 
-    #allData = allData.transpose()
+    allData = allData.transpose()
 
     
     pairWiseDist = dist.pdist(allData)
